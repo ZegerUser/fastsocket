@@ -4,8 +4,10 @@ import logging
 from typing import Dict, List, Callable, Any
 import websockets
 
+from .constants import *
 from .message import Message
 from .utils import setup_logger
+
 
 class Client:
     """
@@ -144,6 +146,7 @@ class Client:
                 return response
             except asyncio.TimeoutError:
                 self._logger.warning(f"Timeout waiting for response to message {msg.uuid}")
+                return Message(msg.uuid, TIMEOUT, {"info": "Timed out", "error": "Got no response from service within the timeout period"})
             finally:
                 self._response_futures.pop(msg.uuid, None)
         
