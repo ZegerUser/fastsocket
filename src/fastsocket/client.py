@@ -27,6 +27,7 @@ class Client:
         self._registed_callbacks: Dict[str, List[Callable]] = {}
         self._logger, _ = setup_logger("Client", log_level)
         self._websocket = None
+        self._response_futures: Dict[int, asyncio.Future] = {}
 
     def on_message(self, code: str, func: Callable):
         """
@@ -93,6 +94,10 @@ class Client:
         try:
             msg = Message.from_json(message)
             await self._dispatch_message(msg)
+
+            if msg.uuid in self._response_futures:
+                self._response_futures[msg.uuid].set_result(msg)
+
         except Exception as e:
             self._logger.error(f"Error processing message ({message}): {e}")
 
@@ -116,7 +121,7 @@ class Client:
         if tasks:
             await asyncio.gather(*tasks)
 
-    async def send_msg(self, msg: Message):
+    async def send_msg(self, msg: Message, blocking: bool = False, timeout: float = 30.0):
         """
         Send a message to the WebSocket server.
 
@@ -127,9 +132,22 @@ class Client:
             RuntimeError: If not connected to the server.
         """
         if not self._websocket:
-            raise RuntimeError("Not connected to server")
+            self._logger.critical("Not connected to the server!")
         self._logger.debug(f"Sending msg: {msg.to_json()}")
         await self._websocket.send(msg.to_json())
+
+        if blocking:
+            future = asyncio.get_running_loop().create_future()
+            self._response_futures[msg.uuid] = future
+            try:
+                response = await asyncio.wait_for(future, timeout)
+                return response
+            except asyncio.TimeoutError:
+                self._logger.warning(f"Timeout waiting for response to message {msg.uuid}")
+            finally:
+                self._response_futures.pop(msg.uuid, None)
+        
+        return None
 
     async def __aenter__(self):
         """
