@@ -1,4 +1,5 @@
 import json
+import uuid
 
 class Message:
     """
@@ -10,7 +11,7 @@ class Message:
         data (dict): Payload data of the message.
     """
 
-    def __init__(self, uuid: int, code: str, data: dict) -> None:
+    def __init__(self, code: str, uuid: int = int(uuid.uuid4()),  data: dict = {}) -> None:
         """
         Initialize a Message instance.
 

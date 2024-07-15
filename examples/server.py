@@ -3,7 +3,7 @@ import asyncio
 import logging
 
 async def handle_ping(msg: Message, ws):
-    response = Message(msg.uuid, "PONG", {"data": "Hello from server!"})
+    response = Message("PONG", uuid=msg.uuid, data={"data": "Hello from server!"})
     await ws.send(response.to_json())
 
 async def main():

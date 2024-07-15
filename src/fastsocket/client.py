@@ -146,7 +146,7 @@ class Client:
                 return response
             except asyncio.TimeoutError:
                 self._logger.warning(f"Timeout waiting for response to message {msg.uuid}")
-                return Message(msg.uuid, TIMEOUT, {"info": "Timed out", "error": "Got no response from service within the timeout period"})
+                return Message(TIMEOUT, uuid=msg.uuid, data={"info": "Timed out", "error": "Got no response from service within the timeout period"})
             finally:
                 self._response_futures.pop(msg.uuid, None)
         

@@ -5,10 +5,10 @@ import logging
 async def main():
     async with Client("ws://localhost:8765") as client:
         # Non-blocking send
-        await client.send_msg(Message(1, "PING", {"data": "Hello"}))
+        await client.send_msg(Message("PING", data={"data": "Hello"}))
         
         # Blocking send with timeout
-        response = await client.send_msg(Message(2, "PING", {"data": "Hello"}), blocking=True, timeout=5.0)
+        response = await client.send_msg(Message("PING", data={"data": "Hello"}), blocking=True, timeout=5.0)
         if response:
             print(f"Received response: {response.data}")
         else:
