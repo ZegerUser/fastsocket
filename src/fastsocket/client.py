@@ -114,7 +114,7 @@ class Client:
         tasks = []
         
         for event_type in (msg.code, "ALL"):
-            for func in self._events.get(event_type, []):
+            for func in self._registed_callbacks.get(event_type, []):
                 if asyncio.iscoroutinefunction(func):
                     tasks.append(func(msg))
                 else:
