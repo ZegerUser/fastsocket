@@ -95,10 +95,11 @@ class Client:
         """
         try:
             msg = Message.from_json(message)
-            await self._dispatch_message(msg)
-
+            
             if msg.uuid in self._response_futures:
                 self._response_futures[msg.uuid].set_result(msg)
+            else:
+                await self._dispatch_message(msg)
 
         except Exception as e:
             self._logger.error(f"Error processing message ({message}): {e}")
